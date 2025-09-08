@@ -4,9 +4,7 @@ import numpy as np
 from Cargame_AI import CarGameAI
 from model import Linear_QNet
 
-
 class PlayAgent:
-
     def __init__(self):
         self.model = Linear_QNet(6, 128, 3)
         # Load the trained model

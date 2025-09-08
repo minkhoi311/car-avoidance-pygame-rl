@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Oct  8 14:18:55 2021
-
-@author: LENOVO
-"""
-
 import matplotlib.pyplot as plt
 from IPython import display
 
