@@ -6,12 +6,10 @@ import time
 
 pygame.init()
 
-
 class Direction(Enum):
     RIGHT = 1
     LEFT = 2
     NONE = 3
-
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -20,7 +18,7 @@ BLACK = (0, 0, 0)
 font = pygame.font.SysFont('airal', 25)
 font_init = pygame.font.SysFont('airal', 75)
 font1 = pygame.font.SysFont('airal', 25)
-
+#các phần
 car_main = pygame.image.load('car1.png')
 car_obs_1 = pygame.image.load('car2.png')
 car_obs_2 = pygame.image.load('car3.png')
@@ -33,16 +31,15 @@ offset = 2
 step_size = 10
 car_speed = 25
 
-
 class CarGameAI:
-
+#phần khởi tạo cho game xe
     def __init__(self, w=640, h=640, render=True, win_score=500):
         self.h = h
         self.w = w
         self.render = render
         self.win_score = win_score
 
-        # init display khi cần render
+        # init display khi cần render (bth là tắt)
         if self.render:
             self.display = pygame.display.set_mode((self.w, self.h))
             pygame.display.set_caption('Car Avoidance')
@@ -55,15 +52,18 @@ class CarGameAI:
 
     def reset(self):
         # init game state
+        #tạo hcn va chạm
         self.car_main_rec = car_main.get_rect()
         self.car_obs_rec_1 = car_obs_1.get_rect()
         self.car_obs_rec_2 = car_obs_2.get_rect()
         self.car_obs_rec_3 = car_obs_3.get_rect()
 
+        #tạo cảm biến
         self.sensor_1 = pygame.Rect(217, 0, 50, 640)
         self.sensor_2 = pygame.Rect(297, 0, 50, 640)
         self.sensor_3 = pygame.Rect(372, 0, 50, 640)
 
+        #Đặt xe giữa màn hình
         self.car_main_rec.x = self.w / 2 - car_width / 2 + offset
         self.car_main_rec.y = self.h - car_height
 
@@ -82,9 +82,9 @@ class CarGameAI:
         self.state = 1
         self.state_word = ['Left', 'Middle', 'Right']
         self.car_obs = [car_obs_1, car_obs_2, car_obs_3]
-        self.x_pos = [217, 297, 372]
+        self.x_pos = [217, 297, 372] #tạo độ X của 3 làn đường
         self.game_started = True
-        self._reset_states()
+        self._reset_states()  #tạo ds xe chương ngại vật xuất hiện
 
     def play_step(self, action):
         # Chỉ xử lý event khi render
@@ -104,14 +104,14 @@ class CarGameAI:
                 self._is_collision(self.car_obs_rec_2) or
                 self._is_collision(self.car_obs_rec_3)):
             game_over = True
-            reward = -10
+            reward = -10 #đụng xe thì xe dừng mà -10
             return reward, game_over, self.score
 
             # Add new cars & tính điểm
         for i in range(0, 3):
             if self.car_obs_pos[i][1] > self.h:
-                self.score += 1
-                reward = +10
+                self.score += 1  #xe chướng ngại vật +1
+                reward = +10    #reward +10
                 self.car_obs = random.sample(self.car_obs, len(self.car_obs))
                 self._reset_states()
 
@@ -161,6 +161,7 @@ class CarGameAI:
         self._car_load(self.car_obs[2], self.car_obs_pos[2])
         pygame.display.flip()
 
+    #hướng di chuyển
     def _move(self, action):
         if np.array_equal(action, [1, 0, 0]):
             new_state = 0
@@ -186,6 +187,7 @@ class CarGameAI:
 
         self.car_gamer = [x, y]
 
+    #xe mà chạy nhanh thì né nhanh
     def _move_car(self, num, position):
         y = position[1]
         y += car_speed
@@ -197,6 +199,7 @@ class CarGameAI:
         if num == 2:
             self.car_obs_rec_3.y += car_speed
 
+    #Reset lại toàn bộ vị trí xe chướng ngại vật
     def _reset_states(self):
         for i in range(0, 3):
             self.car_obs_pos[i] = [self.x_pos[i], -100]
@@ -214,10 +217,11 @@ class CarGameAI:
         self.car_list = []
         for i in range(0, np.random.randint(2) + 1):
             self.car_list.append(np.random.randint(3))
-
+    #Kiểm tra xem xe chính có va chạm với bất kỳ xe chướng ngại vật nào không
     def _is_collision(self, car_obs_rec):
         return self.car_main_rec.colliderect(car_obs_rec)
 
+    #Nếu có xe chướng ngại vật nằm trong sensor đó → trả về True
     def _get_sensor_response(self, sensor):
         return (self.car_obs_rec_1.colliderect(sensor) or
                 self.car_obs_rec_2.colliderect(sensor) or

@@ -16,14 +16,18 @@ class Agent:
         self.epsilon = 0  # control randomness
         self.gamma = 0.9  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # pop left
+
+        #model
         self.model = Linear_QNet(6, 128, 3)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
+    #trạng thái
     def get_state(self, game):
         sensor_1 = game.sensor_1
         sensor_2 = game.sensor_2
         sensor_3 = game.sensor_3
 
+        #các state của xe và vật cản 
         state = [
             # car position (one-hot 3 lane)
             game.state == 0,
@@ -65,39 +69,6 @@ class Agent:
             final_move[move] = 1
         return final_move
 
-
-def evaluate(agent, n_games=50, render=False):
-    """Đánh giá agent sau khi train xong"""
-    eval_scores = []
-    game = CarGameAI(render=render, win_score=500)
-
-    for i in range(n_games):
-        game.reset()
-        done = False
-        total_score = 0
-
-        while not done:
-            state_old = agent.get_state(game)
-            final_move = agent.get_action(state_old)  # chọn hành động
-            reward, done, score = game.play_step(final_move)
-            total_score = score
-
-        eval_scores.append(total_score)
-        print(f"[Eval] Game {i+1}/{n_games} | Score: {total_score}")
-
-    mean_score = np.mean(eval_scores)
-    max_score = np.max(eval_scores)
-    min_score = np.min(eval_scores)
-
-    print("\n=== Evaluation Report ===")
-    print(f"Số game đánh giá : {n_games}")
-    print(f"Điểm trung bình  : {mean_score:.2f}")
-    print(f"Điểm cao nhất    : {max_score}")
-    print(f"Điểm thấp nhất   : {min_score}")
-
-    return mean_score, max_score, min_score
-
-
 def train():
     plot_scores = []
     plot_mean_scores = []
@@ -105,15 +76,16 @@ def train():
     record = 0
     agent = Agent()
 
-    game = CarGameAI(render=False, win_score=500)
+    game = CarGameAI(render=False, win_score=500) #tắt phần render
 
     while agent.n_games <= 500:
         state_old = agent.get_state(game)
-        final_move = agent.get_action(state_old)
+        final_move = agent.get_action(state_old) #lấy điểm move tiếp theo
         reward, done, score = game.play_step(final_move)
         state_new = agent.get_state(game)
 
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
+        #remember
         agent.remember(state_old, final_move, reward, state_new, done)
 
         if done:
@@ -130,10 +102,6 @@ def train():
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
-
-    # Sau khi train xong thì lưu model một lần
-    agent.model.save("final_model.pth")
-    print("\nTraining xong, đã lưu model -> final_model.pth")
 
 if __name__ == '__main__':
     train()

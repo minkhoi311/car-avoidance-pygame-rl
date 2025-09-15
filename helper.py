@@ -1,18 +1,16 @@
+import matplotlib
+matplotlib.use("Agg")   # dùng backend không cần GUI
 import matplotlib.pyplot as plt
-from IPython import display
+import numpy as np
 
-plt.ion()
-
-def plot(scores, mean_scores):
-    display.clear_output(wait=True)
-    display.display(plt.gcf())
-    plt.clf()
+def plot(scores, mean_scores, save_path="Training_Result.png"):
+    plt.figure(figsize=(8,5))
     plt.title('Training (CarGameAI)')
     plt.xlabel('Number of Games')
     plt.ylabel('Score')
 
-    plt.plot(scores, label="Score")
-    plt.plot(mean_scores, label="Mean Score")
+    plt.plot(scores, label="Score", color="blue")
+    plt.plot(mean_scores, label="Mean Score", color="orange")
 
     # Đảm bảo trục y hiển thị từ 0 tới max
     y_max = max(max(scores), max(mean_scores)) + 10
@@ -27,25 +25,22 @@ def plot(scores, mean_scores):
 
     plt.legend()
     plt.grid(True, linestyle="--", alpha=0.6)
+    plt.savefig(save_path)
+    plt.close()  # đóng figure sau khi lưu
 
-    # hiển thị realtime và vẫn lưu ra file
-    plt.savefig('Car_Game_AI.png')
-    plt.pause(0.1)
-
-
-def plot_eval(scores):
+def plot_eval(scores, save_path="Evaluation_Result.png"):
     """Vẽ biểu đồ đánh giá sau training"""
     plt.figure(figsize=(8,5))
     plt.title("Evaluation Results")
     plt.xlabel("Game")
     plt.ylabel("Score")
 
-    plt.plot(scores, marker="o", linestyle="-", label="Eval Score")
+    plt.plot(scores, marker="o", linestyle="-", label="Eval Score", color="blue")
     plt.axhline(y=np.mean(scores), color="orange", linestyle="--", label=f"Mean: {np.mean(scores):.2f}")
     plt.axhline(y=np.max(scores), color="green", linestyle="--", label=f"Max: {np.max(scores)}")
     plt.axhline(y=np.min(scores), color="red", linestyle="--", label=f"Min: {np.min(scores)}")
 
     plt.legend()
     plt.grid(True, linestyle="--", alpha=0.6)
-    plt.savefig("Evaluation_Result.png")
-    plt.show()
+    plt.savefig(save_path)
+    plt.close()  # đóng figure sau khi lưu
