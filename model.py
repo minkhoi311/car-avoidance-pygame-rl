@@ -50,14 +50,13 @@ class QTrainer:
 
         #dựa đoán
         pred = self.model(state)
-
         target = pred.clone().detach()
         for idx in range(len(done)):
             Q_new = reward[idx]
             if not done[idx]:
                 Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
 
-            a_idx = torch.argmax(action[idx]).item()
+            a_idx = torch.argmax(action[idx]).item() #chọn so action
             target[idx][a_idx] = Q_new
 
         self.optimizer.zero_grad()
